@@ -71,13 +71,11 @@ object WidgetRefresh {
 private fun buildWidgetViews(context: Context, state: TodayState): RemoteViews {
     val rv = RemoteViews(context.packageName, R.layout.widget_study)
 
-    val status = when {
-        state.completed -> "已完成今日打卡"
-        state.running -> "学习中"
-        state.studiedSeconds > 0 -> "今日进行中"
-        else -> "未开始"
-    }
-    rv.setTextViewText(R.id.widget_status, status)
+    // 顶部：今日学习时间
+    rv.setTextViewText(
+        R.id.widget_today,
+        "今日已学 ${TimeFmt.compactMinutes(state.studiedSeconds / 60)}",
+    )
 
     if (state.running && !state.completed) {
         // 计时中：Chronometer 倒计时，系统每秒自动刷新，省电且流畅
@@ -97,13 +95,10 @@ private fun buildWidgetViews(context: Context, state: TodayState): RemoteViews {
 
     rv.setProgressBar(R.id.widget_progress, 100, (state.progress * 100).toInt(), false)
 
+    // 底部左侧：今日目标
     rv.setTextViewText(
-        R.id.widget_studied,
-        when {
-            state.completed -> "已学 ${state.studiedSeconds / 60} 分"
-            state.studiedSeconds <= 0 -> "还未开始"
-            else -> "已学 ${state.studiedSeconds / 60} 分"
-        },
+        R.id.widget_goal,
+        "目标 ${TimeFmt.compactMinutes(state.goalSeconds / 60)}",
     )
 
     rv.setTextViewText(

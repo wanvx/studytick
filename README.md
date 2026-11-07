@@ -7,7 +7,7 @@
 - 计时基于前台服务 + 常驻通知，锁屏也能看到剩余时间
 - 数据保存在本地数据库，**升级安装不丢打卡记录**
 
-[下载最新版本](https://github.com/wanvx/studytick/releases/latest) · [测试报告](docs/TEST_REPORT.md) · [更新日志](docs/RELEASE_NOTES_v1.0.1.md)
+[下载最新版本](https://github.com/wanvx/studytick/releases/latest) · [测试报告](docs/TEST_REPORT.md) · [更新日志](docs/RELEASE_NOTES_v1.0.2.md)
 
 ## 界面
 
@@ -39,9 +39,9 @@
 - 清除打卡数据（二次确认，保留每日目标设置）
 
 ### 桌面小组件（2×2）
-- 显示今日状态、剩余时间、进度条、已学时长
+- 顶部「今日已学 xx 分」，中间灰色小字「剩余」+ 大号倒计时，下方进度条，底部「目标 / 开始」
 - 计时中由系统 `Chronometer` 逐秒倒计时，不需要频繁唤醒应用
-- 点击卡片打开应用；点击胶囊按钮直接开始 / 结束学习
+- 点击卡片打开应用；点击按钮直接开始 / 结束学习
 - 添加方式：应用内「我的 → 添加桌面小组件」，或长按桌面 → 小组件 → 学刻
 
 ### 锁屏 / 通知
@@ -122,6 +122,7 @@ keytool -genkeypair -v -keystore keystore/studytick.jks \
 | `POST_NOTIFICATIONS` | 显示计时通知（Android 13+ 需授权） |
 | `FOREGROUND_SERVICE` / `FOREGROUND_SERVICE_SPECIAL_USE` | 计时期间保持前台服务 |
 | `INTERNET` / `ACCESS_NETWORK_STATE` | 检查 GitHub 更新 |
+| `RECEIVE_BOOT_COMPLETED` | 开机后恢复未结束的计时会话 |
 
 应用不申请定位、通讯录、存储等无关权限，不上传任何数据。
 
@@ -133,6 +134,7 @@ keytool -genkeypair -v -keystore keystore/studytick.jks \
 
 ## 更新日志
 
+- [1.0.2](docs/RELEASE_NOTES_v1.0.2.md)：桌面小组件改版；修复重装/重启后锁屏通知消失
 - [1.0.1](docs/RELEASE_NOTES_v1.0.1.md)：修复锁屏不显示进度、底部导航栏与系统导航键重叠
 - [1.0.0](docs/RELEASE_NOTES_v1.0.0.md)：首个版本
 

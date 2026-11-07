@@ -36,6 +36,18 @@ object TimeFmt {
     /** 组件的辅助单位文案 */
     fun widgetUnit(totalSeconds: Int): String = if (totalSeconds >= 3600) "剩余小时" else "剩余分钟"
 
+    /** 桌面小组件的紧凑时长：0 分 / 45 分 / 1 时 20 分 / 2 时 */
+    fun compactMinutes(totalMinutes: Int): String {
+        val m = totalMinutes.coerceAtLeast(0)
+        val h = m / 60
+        val rest = m % 60
+        return when {
+            h > 0 && rest > 0 -> "$h 时 $rest 分"
+            h > 0 -> "$h 时"
+            else -> "$m 分"
+        }
+    }
+
     /** 2 小时 30 分 */
     fun human(totalMinutes: Int): String {
         val h = totalMinutes / 60

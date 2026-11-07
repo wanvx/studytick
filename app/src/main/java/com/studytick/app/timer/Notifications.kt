@@ -70,22 +70,24 @@ object Notifications {
             state.studiedSeconds > 0 -> "学习中"
             else -> "刚开始学习"
         }
-        val detail = if (done) {
-            "已完成今日打卡 · 已学 ${TimeFmt.hms(state.studiedSeconds)}"
-        } else {
-            "已学 ${TimeFmt.hms(state.studiedSeconds)} · 剩余 ${TimeFmt.hms(state.remainingSeconds)}"
-        }
-        val progress = if (done) {
-            "今日目标 ${TimeFmt.hms(state.goalSeconds)} 已达成"
-        } else {
-            "今日目标 ${TimeFmt.hms(state.goalSeconds)}"
-        }
 
         val builder = base(context)
-            .setContentTitle(title)
-            .setContentText(detail)
-            .setSubText(progress)
-            .setStyle(NotificationCompat.BigTextStyle().bigText("$detail\n$progress"))
+            // 标题行会与倒计时同排，优先放「状态 + 已学」，锁屏一眼就能同时看到已学与剩余
+            .setContentTitle("$title · 已学 ${TimeFmt.hms(state.studiedSeconds)}")
+            .setContentText(
+                if (done) "今日目标 ${TimeFmt.hms(state.goalSeconds)} 已达成"
+                else "剩余 ${TimeFmt.hms(state.remainingSeconds)}"
+            )
+            .setStyle(
+                NotificationCompat.BigTextStyle().bigText(
+                    if (done) {
+                        "已完成今日打卡 · 已学 ${TimeFmt.hms(state.studiedSeconds)}"
+                    } else {
+                        "已学 ${TimeFmt.hms(state.studiedSeconds)} · 剩余 ${TimeFmt.hms(state.remainingSeconds)}\n" +
+                            "今日目标 ${TimeFmt.hms(state.goalSeconds)}"
+                    }
+                )
+            )
             .setProgress(
                 state.goalSeconds.coerceAtLeast(1),
                 state.studiedSeconds.coerceAtMost(state.goalSeconds.coerceAtLeast(1)),

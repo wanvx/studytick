@@ -126,6 +126,10 @@ class StudyViewModel(app: Application) : AndroidViewModel(app) {
     fun onForeground() {
         viewModelScope.launch {
             repo.reconcileDay()
+            // 会话仍在进行，但进程可能被系统回收过：前台服务和通知都会消失，
+            // 导致「界面显示专注中、锁屏却什么都没有」，这里补启一次（幂等）
+            val state = repo.snapshotToday()
+            if (state.running) TimerController.startTimerService(getApplication())
             WidgetRefresh.refresh(getApplication())
         }
     }

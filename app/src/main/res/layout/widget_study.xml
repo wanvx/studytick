@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 2x2 桌面小组件：状态 + 剩余时间 + 进度 + 一键开始/结束 -->
+<!-- 2x2 桌面小组件：今日已学 + 剩余时间 + 进度 + 一键开始/结束 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -7,69 +7,88 @@
     android:background="@drawable/widget_card_bg"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:padding="14dp">
+    android:padding="13dp">
 
+    <!-- 今日已学（替代原来的状态文字） -->
     <TextView
-        android:id="@+id/widget_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:text="未开始"
-        android:textColor="#8A93A5"
-        android:textSize="10sp" />
-
-    <FrameLayout
+        android:id="@+id/widget_today"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="1dp">
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="今日已学 0 分"
+        android:textColor="#8A93A5"
+        android:textSize="11sp" />
+
+    <!-- 剩余 + 大号时间 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="bottom"
+        android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/widget_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:text="02:00"
-            android:textColor="#0F1620"
-            android:textSize="26sp"
-            android:textStyle="bold" />
+            android:layout_marginEnd="5dp"
+            android:layout_marginBottom="3dp"
+            android:text="剩余"
+            android:textColor="#8A93A5"
+            android:textSize="12sp" />
 
-        <Chronometer
-            android:id="@+id/widget_chrono"
+        <FrameLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="#0F1620"
-            android:textSize="26sp"
-            android:textStyle="bold"
-            android:visibility="gone" />
-    </FrameLayout>
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/widget_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="02:00"
+                android:textColor="#0F1620"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <Chronometer
+                android:id="@+id/widget_chrono"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#0F1620"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+        </FrameLayout>
+    </LinearLayout>
 
     <ProgressBar
         android:id="@+id/widget_progress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="5dp"
+        android:layout_height="6dp"
         android:layout_marginTop="8dp"
         android:max="100"
         android:progress="0"
-        android:progressBackgroundTint="#E6EBF5"
-        android:progressTint="#2F6BFF" />
+        android:progressDrawable="@drawable/widget_progress" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="9dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
         <TextView
-            android:id="@+id/widget_studied"
+            android:id="@+id/widget_goal"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:ellipsize="end"
             android:maxLines="1"
-            android:text="已学 0 分"
+            android:text="目标 2 时"
             android:textColor="#8A93A5"
-            android:textSize="10sp" />
+            android:textSize="11sp" />
 
         <TextView
             android:id="@+id/widget_action"
@@ -77,13 +96,13 @@
             android:layout_height="wrap_content"
             android:background="@drawable/widget_pill_bg"
             android:maxLines="1"
-            android:paddingLeft="12dp"
-            android:paddingTop="5dp"
-            android:paddingRight="12dp"
-            android:paddingBottom="5dp"
+            android:paddingLeft="22dp"
+            android:paddingTop="9dp"
+            android:paddingRight="22dp"
+            android:paddingBottom="9dp"
             android:text="开始"
             android:textColor="#2F6BFF"
-            android:textSize="11sp"
+            android:textSize="14sp"
             android:textStyle="bold" />
     </LinearLayout>
 </LinearLayout>
