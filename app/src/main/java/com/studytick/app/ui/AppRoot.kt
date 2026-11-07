@@ -13,7 +13,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -59,6 +63,11 @@ fun AppRoot(vm: StudyViewModel) {
         runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
     }
 
+    // 系统导航栏（三键 / 手势条）实际占用的高度，edge-to-edge 下必须自己避让
+    val navBarInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    // 悬浮导航栏自身高度 + 与导航栏之间的间距
+    val contentBottomPadding = navBarInset + NAV_BAR_CLEARANCE
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -73,8 +82,19 @@ fun AppRoot(vm: StudyViewModel) {
                 label = "tab",
             ) { index ->
                 when (index) {
-                    0 -> HomeScreen(state = today, onToggle = vm::toggleTimer)
-                    1 -> CalendarScreen(state = today, records = records, onToggle = vm::toggleTimer)
+                    0 -> HomeScreen(
+                        state = today,
+                        onToggle = vm::toggleTimer,
+                        bottomPadding = contentBottomPadding,
+                    )
+
+                    1 -> CalendarScreen(
+                        state = today,
+                        records = records,
+                        onToggle = vm::toggleTimer,
+                        bottomPadding = contentBottomPadding,
+                    )
+
                     else -> ProfileScreen(
                         goalMinutes = goalMinutes,
                         updateState = update,
@@ -83,6 +103,7 @@ fun AppRoot(vm: StudyViewModel) {
                         onOpenUrl = openUrl,
                         onPinWidget = vm::pinWidget,
                         onClearData = vm::clearData,
+                        bottomPadding = contentBottomPadding,
                     )
                 }
             }
@@ -93,10 +114,14 @@ fun AppRoot(vm: StudyViewModel) {
             onSelect = { tab = it },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 18.dp),
+                .navigationBarsPadding()
+                .padding(bottom = 10.dp),
         )
     }
 }
+
+/** 悬浮导航栏高度（约 56dp）上加一点呼吸间距 */
+private val NAV_BAR_CLEARANCE = 88.dp
 
 @Composable
 private fun FloatingNavBar(

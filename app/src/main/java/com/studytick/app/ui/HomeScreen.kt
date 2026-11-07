@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studytick.app.data.TodayState
@@ -25,6 +26,7 @@ import com.studytick.app.util.TimeFmt
 fun HomeScreen(
     state: TodayState,
     onToggle: () -> Unit,
+    bottomPadding: Dp,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -71,6 +73,6 @@ fun HomeScreen(
         Spacer(Modifier.weight(1f))
 
         TimerButton(state = state, onClick = onToggle)
-        Spacer(Modifier.height(96.dp))
+        Spacer(Modifier.height(bottomPadding))
     }
 }

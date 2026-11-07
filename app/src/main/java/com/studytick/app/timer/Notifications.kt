@@ -15,25 +15,39 @@ import com.studytick.app.util.TimeFmt
 
 /**
  * 常驻通知：锁屏上显示「已学 / 剩余」，并用倒计时 chronometer 走秒。
+ *
+ * 关于锁屏可见性：
+ * IMPORTANCE_LOW 的渠道会被系统归入「静默通知」，Android 11 起锁屏默认不展示静默通知，
+ * 因此这里用 IMPORTANCE_DEFAULT + 无声音无震动，既能在锁屏露出，又不会打扰。
+ * 渠道重要性创建后不可修改，故旧渠道（study_timer）需要删除并用新 id 重建。
  */
 object Notifications {
 
-    const val CHANNEL_ID = "study_timer"
+    const val CHANNEL_ID = "study_timer_v2"
+    private const val LEGACY_CHANNEL_ID = "study_timer"
     const val NOTIFICATION_ID = 1001
 
     fun ensureChannel(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val manager = context.getSystemService(NotificationManager::class.java) ?: return
+
+        // 清掉旧版本创建的低重要性渠道，避免设置里出现两个同名「学习计时」
+        if (manager.getNotificationChannel(LEGACY_CHANNEL_ID) != null) {
+            runCatching { manager.deleteNotificationChannel(LEGACY_CHANNEL_ID) }
+        }
+
         if (manager.getNotificationChannel(CHANNEL_ID) != null) return
+
         val channel = NotificationChannel(
             CHANNEL_ID,
             "学习计时",
-            NotificationManager.IMPORTANCE_LOW
+            NotificationManager.IMPORTANCE_DEFAULT
         ).apply {
-            description = "在锁屏上显示今日学习进度"
+            description = "计时中在通知栏与锁屏显示今日学习进度"
             setShowBadge(false)
             enableVibration(false)
             setSound(null, null)
+            enableLights(false)
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
         manager.createNotificationChannel(channel)
@@ -49,17 +63,29 @@ object Notifications {
 
     fun build(context: Context, state: TodayState): Notification {
         ensureChannel(context)
-        val title = if (state.completed) "今日已达标" else "学习中"
-        val text = if (state.completed) {
+
+        val done = state.completed
+        val title = when {
+            done -> "今日已达标"
+            state.studiedSeconds > 0 -> "学习中"
+            else -> "刚开始学习"
+        }
+        val detail = if (done) {
             "已完成今日打卡 · 已学 ${TimeFmt.hms(state.studiedSeconds)}"
         } else {
             "已学 ${TimeFmt.hms(state.studiedSeconds)} · 剩余 ${TimeFmt.hms(state.remainingSeconds)}"
         }
+        val progress = if (done) {
+            "今日目标 ${TimeFmt.hms(state.goalSeconds)} 已达成"
+        } else {
+            "今日目标 ${TimeFmt.hms(state.goalSeconds)}"
+        }
 
         val builder = base(context)
             .setContentTitle(title)
-            .setContentText(text)
-            .setSubText("今日目标 ${TimeFmt.hms(state.goalSeconds)}")
+            .setContentText(detail)
+            .setSubText(progress)
+            .setStyle(NotificationCompat.BigTextStyle().bigText("$detail\n$progress"))
             .setProgress(
                 state.goalSeconds.coerceAtLeast(1),
                 state.studiedSeconds.coerceAtMost(state.goalSeconds.coerceAtLeast(1)),
@@ -67,10 +93,11 @@ object Notifications {
             )
             .addAction(0, "结束学习", stopIntent(context))
 
-        if (!state.completed) {
+        if (!done) {
             builder.setWhen(System.currentTimeMillis() + state.remainingSeconds * 1000L)
             builder.setUsesChronometer(true)
             builder.setChronometerCountDown(true)
+            builder.setShortcutId("study_timer")
         }
 
         return builder.build()
@@ -81,12 +108,14 @@ object Notifications {
             .setSmallIcon(R.drawable.ic_stat_study)
             .setColor(0xFF2F6BFF.toInt())
             .setOngoing(true)
-            .setSilent(true)
+            // 注意：不要用 setSilent(true)，它会把通知降到静默分区，锁屏就不显示了
             .setOnlyAlertOnce(true)
             .setShowWhen(true)
+            .setAutoCancel(false)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_STOPWATCH)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setDefaults(0)
             .setContentIntent(openIntent(context))
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
 

@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studytick.app.data.DayRecord
@@ -48,6 +49,7 @@ fun CalendarScreen(
     state: TodayState,
     records: List<DayRecord>,
     onToggle: () -> Unit,
+    bottomPadding: Dp,
     modifier: Modifier = Modifier,
 ) {
     var monthKey by rememberSaveable { mutableStateOf(YearMonth.now().toString()) }
@@ -127,7 +129,7 @@ fun CalendarScreen(
 
         Spacer(Modifier.height(22.dp))
         CheckInCard(state, onToggle)
-        Spacer(Modifier.height(96.dp))
+        Spacer(Modifier.height(bottomPadding))
     }
 }
 

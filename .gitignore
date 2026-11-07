@@ -17,3 +17,6 @@ keystore/
 /app/release
 /app/build
 docs/screenshots/
+
+# 本地临时脚本
+_apicommit*.py
