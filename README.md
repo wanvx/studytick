@@ -7,6 +7,8 @@
 - 计时基于前台服务 + 常驻通知，锁屏也能看到剩余时间
 - 数据保存在本地数据库，**升级安装不丢打卡记录**
 
+[下载最新版本](https://github.com/wanvx/studytick/releases/latest) · [测试报告](docs/TEST_REPORT.md) · [更新日志](docs/RELEASE_NOTES_v1.0.0.md)
+
 ## 界面
 
 整体是浅色、留白充足的卡片式设计，主色 `#2F6BFF`。
@@ -122,7 +124,8 @@ keytool -genkeypair -v -keystore keystore/studytick.jks \
 
 ## 已知问题
 
-- 桌面小组件已从 Glance 改造为原生 RemoteViews 实现，功能完整，但在 Android 15 模拟器上尚未完成最终渲染验证，欢迎在真机上反馈
+- 桌面小组件已从 Glance 改造为原生 RemoteViews 实现（Glance 1.1.1 在部分 launcher 上会因 `Resources$NotFoundException: Resource ID #0xffffffff` 加载失败），功能完整，但在 Android 15 模拟器上尚未完成最终渲染验证，欢迎在真机上反馈
+- 详细验证情况见 [测试报告](docs/TEST_REPORT.md)
 
 ## License
 
