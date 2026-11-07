@@ -16,3 +16,4 @@ keystore/
 *.aab
 /app/release
 /app/build
+docs/screenshots/
