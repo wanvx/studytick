@@ -23,11 +23,14 @@ object TimeFmt {
         return if (h > 0) "%d:%02d".format(h, m) else "$m"
     }
 
-    /** 桌面小组件：小于 1 小时用 mm:ss，否则 h:mm */
+    /**
+     * 桌面小组件：与计时中的 Chronometer 保持一致，始终带秒。
+     * 小于 1 小时用 mm:ss，否则 h:mm:ss。
+     */
     fun widget(totalSeconds: Int): String {
         val s = totalSeconds.coerceAtLeast(0)
         return if (s >= 3600) {
-            "%d:%02d".format(s / 3600, (s % 3600) / 60)
+            "%d:%02d:%02d".format(s / 3600, (s % 3600) / 60, s % 60)
         } else {
             "%02d:%02d".format(s / 60, s % 60)
         }
