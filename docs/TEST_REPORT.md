@@ -142,3 +142,45 @@ adb logcat -d | findstr /i "RemoteViews ActionException inflate"
 # 更新检查
 curl -s https://api.github.com/repos/wanvx/studytick/releases/latest
 ```
+
+---
+
+## 五、v1.0.1 修复验证（真机反馈驱动）
+
+真机反馈两项问题，均已定位到代码并修复。
+
+### 1. 锁屏不显示学习进度
+
+| 项 | 内容 |
+| --- | --- |
+| 现象 | 通知栏能看到计时通知，锁屏看不到 |
+| 根因 | 通知渠道为 `IMPORTANCE_LOW`，被系统归入「静默通知」，锁屏默认不展示静默通知 |
+| 修复 | 渠道改为 `IMPORTANCE_DEFAULT`（`setSound(null)` + `enableVibration(false)` 保持静默）；新渠道 `study_timer_v2`；升级时删除旧渠道；移除 `setSilent(true)`；类别改 `CATEGORY_STOPWATCH`；补 BigText 展开视图 |
+| 校验 | 1. APK dex 中存在 `study_timer_v2`（1 处）与 `deleteNotificationChannel`（2 处）<br>2. 通知构建路径不再调用 `setSilent` |
+| 待验证 | 真机锁屏实际展示效果（模拟器无有效锁屏环境） |
+
+### 2. 底部导航栏与系统导航键重叠
+
+| 项 | 内容 |
+| --- | --- |
+| 现象 | 悬浮导航栏（今日/日历/我的）被系统导航键压住 |
+| 根因 | 应用启用 edge-to-edge，但导航栏仅用固定 `padding(bottom = 18.dp)`，未避让 `WindowInsets.navigationBars` |
+| 修复 | 导航栏加 `navigationBarsPadding()`；三页底部留白由固定 96dp 改为 `navigationBars inset + 88dp` 动态计算 |
+| 校验 | 代码中三处调用点均传入 `bottomPadding`；dex 中存在 `navigationBarsPadding`（4 处） |
+| 待验证 | 真机三键/手势两种导航模式下的实际观感 |
+
+### 3. 新增「锁屏与通知」入口
+
+`ProfileScreen` 新增卡片：读取 `NotificationManagerCompat.areNotificationsEnabled()`，在 `ON_RESUME` 时刷新状态；点击跳转 `Settings.ACTION_APP_NOTIFICATION_SETTINGS`。用于解决厂商 ROM 关闭锁屏通知导致「代码改了仍不显示」的场景。
+
+### 4. 发布与升级链路
+
+| 项 | 结果 |
+| --- | --- |
+| 版本 | 1.0.0 → 1.0.1（versionCode 1 → 2） |
+| 签名 | 与 1.0.0 同一证书（SHA-256 `ff67c1ed…6729`），可覆盖安装 |
+| Release | v1.0.1 已创建，附件 `StudyTick-1.0.1.apk` 11,559,451 字节，state=uploaded |
+| 更新接口 | `GET /repos/wanvx/studytick/releases/latest` 返回 `tag_name=v1.0.1`，与 `UpdateChecker.kt` 解析字段对齐 |
+| 数据迁移 | 无破坏性变更（Room 未改 schema、DataStore 键未改），覆盖安装保留记录 |
+
+> 1.0.1 的上述改动经编译与 APK 静态校验，**未做真机运行验证**——待验证项正是必须在真机上看的两项。

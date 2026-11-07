@@ -7,7 +7,7 @@
 - 计时基于前台服务 + 常驻通知，锁屏也能看到剩余时间
 - 数据保存在本地数据库，**升级安装不丢打卡记录**
 
-[下载最新版本](https://github.com/wanvx/studytick/releases/latest) · [测试报告](docs/TEST_REPORT.md) · [更新日志](docs/RELEASE_NOTES_v1.0.0.md)
+[下载最新版本](https://github.com/wanvx/studytick/releases/latest) · [测试报告](docs/TEST_REPORT.md) · [更新日志](docs/RELEASE_NOTES_v1.0.1.md)
 
 ## 界面
 
@@ -15,7 +15,7 @@
 
 - **主页**：顶部日期与状态胶囊（未开始 / 专注中 / 已完成），中央 270° 渐变圆环 + 已学时长，下方目标与剩余时间，底部「开始学习 / 结束学习」大按钮
 - **日历**：上半部分月历（今日为蓝色圆形，打卡日为蓝色小方块），下半部分今日打卡卡片（已学 / 剩余 / 目标三栏 + 开始计时按钮）
-- **我的**：每日学习目标（± 微调与快捷档位）、软件更新、添加桌面小组件、GitHub 仓库、清除打卡数据
+- **我的**：每日学习目标（± 微调与快捷档位）、软件更新、锁屏与通知设置、添加桌面小组件、GitHub 仓库、清除打卡数据
 - **通知栏 / 锁屏**：常驻通知显示「学习中」、已学时长、剩余时间、进度条与倒计时，可直接结束学习
 
 
@@ -47,6 +47,9 @@
 ### 锁屏 / 通知
 - 前台服务维持计时，常驻通知显示已学时长、剩余时间与进度条
 - 通知使用倒计时样式，锁屏可见；通知内可直接「结束学习」
+- 通知渠道为默认重要性（无声音、无震动）。若锁屏仍看不到，请检查两处：
+  系统「设置 → 通知 → 学刻 → 锁屏通知」是否允许，以及是否开启了「隐藏通知内容」
+- 应用内「我的 → 锁屏与通知」可直达该设置页
 
 ## 下载安装
 
@@ -124,8 +127,14 @@ keytool -genkeypair -v -keystore keystore/studytick.jks \
 
 ## 已知问题
 
-- 桌面小组件已从 Glance 改造为原生 RemoteViews 实现（Glance 1.1.1 在部分 launcher 上会因 `Resources$NotFoundException: Resource ID #0xffffffff` 加载失败），功能完整，但在 Android 15 模拟器上尚未完成最终渲染验证，欢迎在真机上反馈
+- 桌面小组件采用原生 RemoteViews 实现（早期 Glance 1.1.1 版本在部分 launcher 上会因 `Resources$NotFoundException: Resource ID #0xffffffff` 加载失败，已弃用该方案），功能完整，但在 Android 15 模拟器上尚未完成最终渲染验证，欢迎在真机上反馈
+- 锁屏通知的显示同时受系统开关控制：部分厂商系统（小米 / 华为 / OPPO / vivo）默认关闭应用的锁屏通知，需在系统设置中手动允许
 - 详细验证情况见 [测试报告](docs/TEST_REPORT.md)
+
+## 更新日志
+
+- [1.0.1](docs/RELEASE_NOTES_v1.0.1.md)：修复锁屏不显示进度、底部导航栏与系统导航键重叠
+- [1.0.0](docs/RELEASE_NOTES_v1.0.0.md)：首个版本
 
 ## License
 
