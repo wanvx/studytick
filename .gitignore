@@ -20,3 +20,5 @@ docs/screenshots/
 
 # 本地临时脚本
 _apicommit*.py
+_push.py
+_*.py
