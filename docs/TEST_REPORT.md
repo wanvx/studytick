@@ -184,3 +184,43 @@ curl -s https://api.github.com/repos/wanvx/studytick/releases/latest
 | 数据迁移 | 无破坏性变更（Room 未改 schema、DataStore 键未改），覆盖安装保留记录 |
 
 > 1.0.1 的上述改动经编译与 APK 静态校验，**未做真机运行验证**——待验证项正是必须在真机上看的两项。
+
+---
+
+## 六、v1.0.2 验证（模拟器实测，含截图）
+
+### 1. 桌面小组件改版
+
+| 验证项 | 方式 | 结果 |
+| --- | --- | --- |
+| 布局完整渲染 | `requestPinAppWidget` → 系统确认框实时预览 → 确认后截图 | 通过：`今日已学 8 分` / `剩余 1:51` / 进度条 / `目标 2 时` / `开始`，无裁切 |
+| 「剩余」在时间前 | 截图 + `uiautomator dump` 节点顺序 | 通过：`text="剩余"` 节点 x 坐标小于时间数字 |
+| 状态文字已移除 | 源码 grep `widget_status` / `widget_studied` | 通过：无残留引用，新增 `widget_today` / `widget_goal` |
+| 进度条可见 | 首版用 `progressTint` 时截图不可见，改为自绘 `layer-list` | 通过：轨道（`#E6EBF5`）与进度（`#2F6BFF`）均可辨认 |
+| 计时态切换 | 点小组件「开始」按钮 | 通过：`Chronometer` 显示 `1:59:51` 并逐秒递减，按钮变「结束」 |
+| 后台直接开始 | 点胶囊按钮后不打开应用 | 通过：`StudyTimerService isForeground=true` |
+
+### 2. 锁屏通知
+
+| 验证项 | 方式 | 结果 |
+| --- | --- | --- |
+| 锁屏可见 | `locksettings set-disabled false` → `KEYCODE_SLEEP` → `KEYCODE_WAKEUP` → 截图 | 通过：`mDreamingLockscreen=true` 时通知正常显示 |
+| 同时含已学与剩余 | 截图文字 | 通过：`学习中 · 已学 00:07:18 · 1:52:32` |
+| 渠道重要性 | `dumpsys notification` | 通过：`importance=3`（DEFAULT），旧版为 2（LOW，锁屏隐藏） |
+| 无声音无震动 | 同上 | 通过：`sound=null vibrate=null defaults=0` |
+
+### 3. 服务恢复（本次修复的 bug）
+
+| 场景 | 预期 | 结果 |
+| --- | --- | --- |
+| 覆盖安装后不打开应用 | `MY_PACKAGE_REPLACED` 触发恢复 | 通过：服务自动 `isForeground=true`，通知 id=1001 存在 |
+| 应用回到前台 | `onForeground` 补启服务 | 通过：代码 + 实测覆盖安装场景 |
+| 会话数据一致 | 服务与 UI 同源 | 通过：`day_records` = `2026-11-07\|524\|7200\|0` |
+
+### 4. 未覆盖项
+
+| 项目 | 说明 |
+| --- | --- |
+| 真机厂商 ROM 锁屏策略 | MIUI / EMUI / ColorOS 有独立锁屏通知开关，需真机确认 |
+| 三键导航与手势导航两种模式的观感 | 1.0.1 的 `navigationBarsPadding` 改动已编译验证，本轮模拟器为手势导航 |
+| 开机（真实重启）恢复 | 已验证 `MY_PACKAGE_REPLACED` 路径；`BOOT_COMPLETED` 逻辑同源 |
