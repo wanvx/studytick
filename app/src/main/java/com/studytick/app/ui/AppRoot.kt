@@ -56,6 +56,7 @@ fun AppRoot(vm: StudyViewModel) {
     val today by vm.today.collectAsStateWithLifecycle()
     val records by vm.records.collectAsStateWithLifecycle()
     val goalMinutes by vm.goalMinutes.collectAsStateWithLifecycle()
+    val weeklyGoalHours by vm.weeklyGoalHours.collectAsStateWithLifecycle()
     val update by vm.update.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
@@ -97,8 +98,10 @@ fun AppRoot(vm: StudyViewModel) {
 
                     else -> ProfileScreen(
                         goalMinutes = goalMinutes,
+                        weeklyGoalHours = weeklyGoalHours,
                         updateState = update,
                         onGoalChange = vm::setGoal,
+                        onWeeklyGoalChange = vm::setWeeklyGoal,
                         onCheckUpdate = vm::checkUpdate,
                         onOpenUrl = openUrl,
                         onPinWidget = vm::pinWidget,

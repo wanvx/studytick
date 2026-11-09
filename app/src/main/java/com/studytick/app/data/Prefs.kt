@@ -18,6 +18,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 data class PrefsSnapshot(
     val goalMinutes: Int = DEFAULT_GOAL_MINUTES,
+    val weeklyGoalHours: Int = DEFAULT_WEEKLY_GOAL_HOURS,
     val sessionStartAt: Long = 0L,
     val sessionDate: String = "",
     val sessionBaseSeconds: Int = 0,
@@ -26,6 +27,7 @@ data class PrefsSnapshot(
 
     companion object {
         const val DEFAULT_GOAL_MINUTES = 120
+        const val DEFAULT_WEEKLY_GOAL_HOURS = 30
     }
 }
 
@@ -33,6 +35,7 @@ class Prefs(private val context: Context) {
 
     private object Keys {
         val GOAL = intPreferencesKey("goal_minutes")
+        val WEEKLY_GOAL = intPreferencesKey("weekly_goal_hours")
         val SESSION_START = longPreferencesKey("session_start_at")
         val SESSION_DATE = stringPreferencesKey("session_date")
         val SESSION_BASE = intPreferencesKey("session_base_seconds")
@@ -43,6 +46,7 @@ class Prefs(private val context: Context) {
         .map { p ->
             PrefsSnapshot(
                 goalMinutes = p[Keys.GOAL] ?: PrefsSnapshot.DEFAULT_GOAL_MINUTES,
+                weeklyGoalHours = p[Keys.WEEKLY_GOAL] ?: PrefsSnapshot.DEFAULT_WEEKLY_GOAL_HOURS,
                 sessionStartAt = p[Keys.SESSION_START] ?: 0L,
                 sessionDate = p[Keys.SESSION_DATE] ?: "",
                 sessionBaseSeconds = p[Keys.SESSION_BASE] ?: 0,
@@ -51,6 +55,10 @@ class Prefs(private val context: Context) {
 
     suspend fun setGoalMinutes(minutes: Int) {
         context.dataStore.edit { it[Keys.GOAL] = minutes }
+    }
+
+    suspend fun setWeeklyGoalHours(hours: Int) {
+        context.dataStore.edit { it[Keys.WEEKLY_GOAL] = hours }
     }
 
     suspend fun beginSession(date: String, baseSeconds: Int, startAt: Long) {

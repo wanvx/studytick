@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 2x2 桌面小组件：今日已学 + 剩余时间 + 进度 + 一键开始/结束 -->
+<!-- 2x2 桌面小组件：今日已学 + 剩余时间 + 今日进度 + 本周进度 + 一键开始/结束 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
@@ -7,7 +7,7 @@
     android:background="@drawable/widget_card_bg"
     android:gravity="center_vertical"
     android:orientation="vertical"
-    android:padding="13dp">
+    android:padding="12dp">
 
     <!-- 今日已学（替代原来的状态文字） -->
     <TextView
@@ -66,16 +66,28 @@
         android:id="@+id/widget_progress"
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
-        android:layout_height="6dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="5dp"
+        android:layout_marginTop="6dp"
         android:max="100"
         android:progress="0"
         android:progressDrawable="@drawable/widget_progress" />
 
+    <!-- 本周进度：已完成 / 计划 · 剩余 -->
+    <TextView
+        android:id="@+id/widget_week"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="本周 0/30 时 · 剩 30 时"
+        android:textColor="#8A93A5"
+        android:textSize="11sp" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="9dp"
+        android:layout_marginTop="6dp"
         android:gravity="center_vertical"
         android:orientation="horizontal">
 

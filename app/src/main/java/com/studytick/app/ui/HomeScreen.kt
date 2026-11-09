@@ -70,6 +70,9 @@ fun HomeScreen(
             RemainingPill(state)
         }
 
+        Spacer(Modifier.height(16.dp))
+        WeekProgressCard(state)
+
         Spacer(Modifier.weight(1f))
 
         TimerButton(state = state, onClick = onToggle)

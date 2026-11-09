@@ -1,4 +1,4 @@
-# 学刻 StudyTick
+# 学无止境 StudyTick
 
 一个干净、克制的每日学习打卡应用。设一个每日目标，专注计时，用日历留下每一天的痕迹。
 
@@ -7,7 +7,7 @@
 - 计时基于前台服务 + 常驻通知，锁屏也能看到剩余时间
 - 数据保存在本地数据库，**升级安装不丢打卡记录**
 
-[下载最新版本](https://github.com/wanvx/studytick/releases/latest) · [测试报告](docs/TEST_REPORT.md) · [更新日志](docs/RELEASE_NOTES_v1.0.3.md)
+[下载最新版本](https://github.com/wanvx/studytick/releases/latest) · [测试报告](docs/TEST_REPORT.md) · [更新日志](docs/RELEASE_NOTES_v1.1.0.md)
 
 ## 界面
 
@@ -134,6 +134,7 @@ keytool -genkeypair -v -keystore keystore/studytick.jks \
 
 ## 更新日志
 
+- [1.1.0](docs/RELEASE_NOTES_v1.1.0.md)：更名「学无止境」+ 新图标；新增每周学习计划与本月/连续打卡统计
 - [1.0.3](docs/RELEASE_NOTES_v1.0.3.md)：小组件剩余时间统一显示到秒（时:分:秒）
 - [1.0.2](docs/RELEASE_NOTES_v1.0.2.md)：桌面小组件改版；修复重装/重启后锁屏通知消失
 - [1.0.1](docs/RELEASE_NOTES_v1.0.1.md)：修复锁屏不显示进度、底部导航栏与系统导航键重叠

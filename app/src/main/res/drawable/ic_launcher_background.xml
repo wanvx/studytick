@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 品牌底：从左上偏亮到右下偏深的品牌蓝渐变，比纯色更有层次 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="108"
+                android:endY="108"
+                android:startX="0"
+                android:startY="0"
+                android:type="linear">
+                <item android:color="#5E90FF" android:offset="0" />
+                <item android:color="#2F6BFF" android:offset="0.55" />
+                <item android:color="#1B44C8" android:offset="1" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- 左上柔和高光，避免大面积纯色显平 -->
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:centerX="34"
+                android:centerY="28"
+                android:gradientRadius="72"
+                android:type="radial">
+                <item android:color="#33FFFFFF" android:offset="0" />
+                <item android:color="#00FFFFFF" android:offset="1" />
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>

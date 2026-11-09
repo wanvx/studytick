@@ -37,11 +37,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studytick.app.data.DayRecord
 import com.studytick.app.data.TodayState
 import com.studytick.app.util.TimeFmt
+import java.time.LocalDate
 import java.time.YearMonth
 
 @Composable
@@ -56,6 +58,27 @@ fun CalendarScreen(
     val month = remember(monthKey) { YearMonth.parse(monthKey) }
     val today = state.date
     val recordMap = remember(records) { records.associateBy { it.date } }
+
+    // 本月已打卡天数（跟随当前查看的月份）
+    val monthCheckInDays = remember(records, month) {
+        records.count { record ->
+            record.completed &&
+                runCatching { YearMonth.from(LocalDate.parse(record.date)) }.getOrNull() == month
+        }
+    }
+    // 连续打卡天数：今天没达标时从昨天起算，今天还没结束不算断
+    val streakDays = remember(records, state) {
+        var day = if (state.completed) state.date else state.date.minusDays(1)
+        var count = 0
+        while (count < 3660) {
+            val done = if (day == state.date) state.completed
+            else recordMap[day.toString()]?.completed == true
+            if (!done) break
+            count++
+            day = day.minusDays(1)
+        }
+        count
+    }
 
     val leading = month.atDay(1).dayOfWeek.value - 1
     val daysInMonth = month.lengthOfMonth()
@@ -128,8 +151,32 @@ fun CalendarScreen(
         }
 
         Spacer(Modifier.height(22.dp))
+        MonthStatsCard(monthCheckInDays = monthCheckInDays, streakDays = streakDays)
+        Spacer(Modifier.height(14.dp))
         CheckInCard(state, onToggle)
         Spacer(Modifier.height(bottomPadding))
+    }
+}
+
+/** 本月坚持天数 + 连续打卡天数 */
+@Composable
+private fun MonthStatsCard(monthCheckInDays: Int, streakDays: Int) {
+    SettingCard {
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            StatColumn(
+                label = "本月已坚持",
+                value = "$monthCheckInDays 天",
+                modifier = Modifier.weight(1f),
+                valueSize = 17.sp,
+            )
+            StatDivider()
+            StatColumn(
+                label = "连续打卡",
+                value = "$streakDays 天",
+                modifier = Modifier.weight(1f),
+                valueSize = 17.sp,
+            )
+        }
     }
 }
 
@@ -254,14 +301,19 @@ private fun CheckInCard(state: TodayState, onToggle: () -> Unit) {
 }
 
 @Composable
-private fun StatColumn(label: String, value: String, modifier: Modifier = Modifier) {
+private fun StatColumn(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    valueSize: TextUnit = 15.sp,
+) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
             color = MaterialTheme.colorScheme.onSurface,
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontFeatureSettings = "tnum",
-                fontSize = 15.sp,
+                fontSize = valueSize,
                 fontWeight = FontWeight.SemiBold,
             ),
         )

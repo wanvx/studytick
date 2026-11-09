@@ -95,6 +95,15 @@ private fun buildWidgetViews(context: Context, state: TodayState): RemoteViews {
 
     rv.setProgressBar(R.id.widget_progress, 100, (state.progress * 100).toInt(), false)
 
+    // 本周进度：已完成的时长 / 计划时长 · 剩余
+    val weekGoalHours = state.weekGoalSeconds / 3600
+    val weekDone = TimeFmt.hoursShort(state.weekStudiedSeconds)
+    rv.setTextViewText(
+        R.id.widget_week,
+        if (state.weekCompleted) "本周 $weekDone/$weekGoalHours 时 · 已完成"
+        else "本周 $weekDone/$weekGoalHours 时 · 剩 ${TimeFmt.hoursShort(state.weekRemainingSeconds)} 时",
+    )
+
     // 底部左侧：今日目标
     rv.setTextViewText(
         R.id.widget_goal,

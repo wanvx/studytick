@@ -62,6 +62,15 @@ object TimeFmt {
         }
     }
 
+    /** 秒 → "3 时 20 分"，用于本周进度等累计时长 */
+    fun hoursMinutes(totalSeconds: Int): String = compactMinutes(totalSeconds / 60)
+
+    /** 秒 → "3.5" / "3"，小时数保留一位小数（整数不带 .0） */
+    fun hoursShort(totalSeconds: Int): String {
+        val tenths = totalSeconds * 10 / 3600
+        return if (tenths % 10 == 0) "${tenths / 10}" else "${tenths / 10}.${tenths % 10}"
+    }
+
     private val WEEK_CN = arrayOf("周一", "周二", "周三", "周四", "周五", "周六", "周日")
 
     fun weekdayCn(date: LocalDate): String = WEEK_CN[date.dayOfWeek.value - 1]

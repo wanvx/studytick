@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">学刻</string>
-    <string name="widget_description">今日学习进度与剩余时间，一键开始计时</string>
-    <string name="widget_label">今日学习</string>
+    <string name="app_name">学无止境</string>
+    <string name="widget_description">今日与本周进度、剩余时间，一键开始计时</string>
+    <string name="widget_label">学无止境</string>
 </resources>

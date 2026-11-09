@@ -56,6 +56,12 @@ class StudyViewModel(app: Application) : AndroidViewModel(app) {
         PrefsSnapshot.DEFAULT_GOAL_MINUTES,
     )
 
+    val weeklyGoalHours: StateFlow<Int> = repo.weeklyGoalHours.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(3000),
+        PrefsSnapshot.DEFAULT_WEEKLY_GOAL_HOURS,
+    )
+
     private val _update = MutableStateFlow<UpdateUi>(UpdateUi.Idle)
     val update: StateFlow<UpdateUi> = _update.asStateFlow()
 
@@ -81,6 +87,13 @@ class StudyViewModel(app: Application) : AndroidViewModel(app) {
     fun setGoal(minutes: Int) {
         viewModelScope.launch {
             repo.setGoalMinutes(minutes)
+            WidgetRefresh.refresh(getApplication())
+        }
+    }
+
+    fun setWeeklyGoal(hours: Int) {
+        viewModelScope.launch {
+            repo.setWeeklyGoalHours(hours)
             WidgetRefresh.refresh(getApplication())
         }
     }

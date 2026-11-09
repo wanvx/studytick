@@ -269,6 +269,92 @@ fun SettingCard(
     }
 }
 
+/** 细进度条：今日/本周的横向进度，圆角 + 主色渐变 */
+@Composable
+fun ThinProgress(
+    progress: Float,
+    modifier: Modifier = Modifier,
+    barHeight: Dp = 6.dp,
+) {
+    val animated by animateFloatAsState(
+        targetValue = progress.coerceIn(0f, 1f),
+        animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing),
+        label = "thinBar",
+    )
+    val primary = MaterialTheme.colorScheme.primary
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(barHeight)
+            .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
+    ) {
+        if (animated > 0.001f) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(animated)
+                    .height(barHeight)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(primary.copy(alpha = 0.7f), primary)
+                        ),
+                        CircleShape,
+                    ),
+            )
+        }
+    }
+}
+
+/** 本周计划进度：已完成 / 剩余 / 计划，与今日进度并列展示 */
+@Composable
+fun WeekProgressCard(state: TodayState, modifier: Modifier = Modifier) {
+    val variant = MaterialTheme.colorScheme.onSurfaceVariant
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 18.dp, vertical = 16.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "本周",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = variant,
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = if (state.weekCompleted) "本周已完成"
+                    else "剩余 ${TimeFmt.hoursMinutes(state.weekRemainingSeconds)}",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Spacer(Modifier.height(12.dp))
+            ThinProgress(progress = state.weekProgress)
+            Spacer(Modifier.height(10.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "已完成 ${TimeFmt.hoursMinutes(state.weekStudiedSeconds)}",
+                    fontSize = 11.sp,
+                    color = variant,
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = "计划 ${state.weekGoalSeconds / 3600} 时",
+                    fontSize = 11.sp,
+                    color = variant,
+                )
+            }
+        }
+    }
+}
+
 @Composable
 fun StepButton(label: String, enabled: Boolean = true, onClick: () -> Unit) {
     Surface(

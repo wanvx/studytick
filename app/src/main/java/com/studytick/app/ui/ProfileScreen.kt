@@ -59,8 +59,10 @@ import com.studytick.app.util.TimeFmt
 @Composable
 fun ProfileScreen(
     goalMinutes: Int,
+    weeklyGoalHours: Int,
     updateState: UpdateUi,
     onGoalChange: (Int) -> Unit,
+    onWeeklyGoalChange: (Int) -> Unit,
     onCheckUpdate: () -> Unit,
     onOpenUrl: (String) -> Unit,
     onPinWidget: () -> Unit,
@@ -141,6 +143,45 @@ fun ProfileScreen(
                     ) { onGoalChange(minutes) }
                 }
             }
+        }
+
+        Spacer(Modifier.height(14.dp))
+
+        SettingCard {
+            Text(
+                text = "每周学习计划",
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                StepButton(
+                    "−",
+                    enabled = weeklyGoalHours > StudyRepository.MIN_WEEKLY_GOAL_HOURS,
+                ) { onWeeklyGoalChange(weeklyGoalHours - 1) }
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "$weeklyGoalHours 小时",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+                StepButton(
+                    "+",
+                    enabled = weeklyGoalHours < StudyRepository.MAX_WEEKLY_GOAL_HOURS,
+                ) { onWeeklyGoalChange(weeklyGoalHours + 1) }
+            }
+            Spacer(Modifier.height(14.dp))
+            Text(
+                text = "以 1 小时为单位调整，今日与桌面小组件会显示本周进度",
+                fontSize = 11.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
 
         Spacer(Modifier.height(14.dp))

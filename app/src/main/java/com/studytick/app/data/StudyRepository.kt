@@ -7,10 +7,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.temporal.TemporalAdjusters
 
 /** 今日学习状态（实时推算，不依赖数据库每秒写入）。 */
 data class TodayState(
@@ -19,10 +21,20 @@ data class TodayState(
     val goalSeconds: Int,
     val running: Boolean,
     val completed: Boolean,
+    /** 本周（周一 00:00 起）已学秒数，含进行中的会话 */
+    val weekStudiedSeconds: Int = 0,
+    /** 本周计划秒数（个人页设置的周目标） */
+    val weekGoalSeconds: Int = 0,
 ) {
     val remainingSeconds: Int get() = (goalSeconds - studiedSeconds).coerceAtLeast(0)
     val progress: Float
         get() = if (goalSeconds <= 0) 0f else (studiedSeconds.toFloat() / goalSeconds).coerceIn(0f, 1f)
+
+    val weekRemainingSeconds: Int get() = (weekGoalSeconds - weekStudiedSeconds).coerceAtLeast(0)
+    val weekProgress: Float
+        get() = if (weekGoalSeconds <= 0) 0f
+        else (weekStudiedSeconds.toFloat() / weekGoalSeconds).coerceIn(0f, 1f)
+    val weekCompleted: Boolean get() = weekGoalSeconds > 0 && weekStudiedSeconds >= weekGoalSeconds
 }
 
 class StudyRepository(
@@ -38,6 +50,8 @@ class StudyRepository(
     }
 
     val goalMinutes: Flow<Int> = prefs.snapshot.map { it.goalMinutes }.distinctUntilChanged()
+
+    val weeklyGoalHours: Flow<Int> = prefs.snapshot.map { it.weeklyGoalHours }.distinctUntilChanged()
 
     fun observeRecords(): Flow<List<DayRecord>> = dao.observeAll()
 
@@ -59,7 +73,25 @@ class StudyRepository(
         val elapsed =
             if (liveSession) ((now - snap.sessionStartAt) / 1000L).toInt().coerceAtLeast(0) else 0
         val studied = (base + elapsed).coerceAtMost(MAX_DAY_SECONDS)
-        return TodayState(today, studied, goal, liveSession, studied >= goal)
+
+        // 本周：周一 00:00 起。今天的记录可能落后于实时值（会话中不逐秒写库），
+        // 所以今天用 studied，其余日期用库里的值。
+        val weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).toString()
+        val todayKey = today.toString()
+        val weekBefore = records
+            .filter { it.date >= weekStart && it.date < todayKey }
+            .sumOf { it.studiedSeconds }
+        val weekStudied = weekBefore + studied
+
+        return TodayState(
+            date = today,
+            studiedSeconds = studied,
+            goalSeconds = goal,
+            running = liveSession,
+            completed = studied >= goal,
+            weekStudiedSeconds = weekStudied,
+            weekGoalSeconds = snap.weeklyGoalHours * 3600,
+        )
     }
 
     /** 开始一次学习计时。 */
@@ -109,7 +141,12 @@ class StudyRepository(
         )
     }
 
-    /** 清除全部打卡数据（保留每日目标设置）。 */
+    /** 设置每周计划小时数（个人页 ±1 小时）。只影响每周进度展示，不改历史记录。 */
+    suspend fun setWeeklyGoalHours(hours: Int) {
+        prefs.setWeeklyGoalHours(hours.coerceIn(MIN_WEEKLY_GOAL_HOURS, MAX_WEEKLY_GOAL_HOURS))
+    }
+
+    /** 清除全部打卡数据（保留每日目标与每周计划设置）。 */
     suspend fun clearRecords() {
         if (prefs.snapshot.first().sessionStartAt > 0L) stopSession()
         dao.clearAll()
@@ -126,6 +163,8 @@ class StudyRepository(
     companion object {
         const val MIN_GOAL_MINUTES = 5
         const val MAX_GOAL_MINUTES = 720
+        const val MIN_WEEKLY_GOAL_HOURS = 1
+        const val MAX_WEEKLY_GOAL_HOURS = 100
         private const val MAX_DAY_SECONDS = 20 * 3600
     }
 }
