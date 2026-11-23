@@ -43,8 +43,11 @@ import androidx.compose.ui.unit.sp
 import com.studytick.app.data.DayRecord
 import com.studytick.app.data.TodayState
 import com.studytick.app.util.TimeFmt
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.temporal.TemporalAdjusters
+import java.util.Locale
 
 @Composable
 fun CalendarScreen(
@@ -66,18 +69,41 @@ fun CalendarScreen(
                 runCatching { YearMonth.from(LocalDate.parse(record.date)) }.getOrNull() == month
         }
     }
-    // 连续打卡天数：今天没达标时从昨天起算，今天还没结束不算断
-    val streakDays = remember(records, state) {
-        var day = if (state.completed) state.date else state.date.minusDays(1)
+    // 连续打卡周数：一周（周一至周日）有 5 天及以上达标即算这一周打卡成功。
+    // 本周还没凑够 5 天时从上一周开始算，避免周中就被清零。
+    val streakWeeks = remember(records, state) {
+        fun done(date: LocalDate): Boolean =
+            if (date == state.date) state.completed else recordMap[date.toString()]?.completed == true
+
+        var weekStart = state.date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
         var count = 0
-        while (count < 3660) {
-            val done = if (day == state.date) state.completed
-            else recordMap[day.toString()]?.completed == true
-            if (!done) break
-            count++
-            day = day.minusDays(1)
+        var firstWeek = true
+        var guard = 0
+        while (guard < 520) {
+            val doneDays = (0..6).count { offset ->
+                val day = weekStart.plusDays(offset.toLong())
+                day <= state.date && done(day)
+            }
+            when {
+                doneDays >= 5 -> count++
+                firstWeek -> Unit // 本周尚未达成，不算中断
+                else -> break
+            }
+            firstWeek = false
+            weekStart = weekStart.minusWeeks(1)
+            guard++
         }
         count
+    }
+
+    // 共自习时长：历史记录之和；今天的记录可能落后于实时值（计时中不逐秒写库），用实时值替换
+    val totalStudiedSeconds = remember(records, state) {
+        val todaySaved = recordMap[state.date.toString()]?.studiedSeconds ?: 0
+        (records.sumOf { it.studiedSeconds } - todaySaved + state.studiedSeconds).coerceAtLeast(0)
+    }
+    val totalHoursText = remember(totalStudiedSeconds) {
+        val h = String.format(Locale.US, "%.1f", totalStudiedSeconds / 3600.0)
+        "${h.removeSuffix(".0")} 小时"
     }
 
     val leading = month.atDay(1).dayOfWeek.value - 1
@@ -151,30 +177,45 @@ fun CalendarScreen(
         }
 
         Spacer(Modifier.height(22.dp))
-        MonthStatsCard(monthCheckInDays = monthCheckInDays, streakDays = streakDays)
+        MonthStatsCard(
+            monthCheckInDays = monthCheckInDays,
+            streakWeeks = streakWeeks,
+            totalHoursText = totalHoursText,
+        )
         Spacer(Modifier.height(14.dp))
         CheckInCard(state, onToggle)
         Spacer(Modifier.height(bottomPadding))
     }
 }
 
-/** 本月坚持天数 + 连续打卡天数 */
+/** 本月坚持天数 + 连续打卡周数 + 共自习时长 */
 @Composable
-private fun MonthStatsCard(monthCheckInDays: Int, streakDays: Int) {
+private fun MonthStatsCard(
+    monthCheckInDays: Int,
+    streakWeeks: Int,
+    totalHoursText: String,
+) {
     SettingCard {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             StatColumn(
                 label = "本月已坚持",
                 value = "$monthCheckInDays 天",
                 modifier = Modifier.weight(1f),
-                valueSize = 17.sp,
+                valueSize = 16.sp,
             )
             StatDivider()
             StatColumn(
                 label = "连续打卡",
-                value = "$streakDays 天",
+                value = "$streakWeeks 周",
                 modifier = Modifier.weight(1f),
-                valueSize = 17.sp,
+                valueSize = 16.sp,
+            )
+            StatDivider()
+            StatColumn(
+                label = "共自习",
+                value = totalHoursText,
+                modifier = Modifier.weight(1f),
+                valueSize = 16.sp,
             )
         }
     }
